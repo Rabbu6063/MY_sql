@@ -1,0 +1,137 @@
+mysql> create database Project;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> use project;
+Database changed
+mysql> ^C
+mysql> CREATE TABLE Customers (
+    ->     CustomerID INT PRIMARY KEY,
+    ->     Name VARCHAR(100),
+    ->     Email VARCHAR(100),
+    ->     City VARCHAR(50),
+    ->     Country VARCHAR(50)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> CREATE TABLE Products (
+    ->     ProductID INT PRIMARY KEY,
+    ->     ProductName VARCHAR(100),
+    ->     Category VARCHAR(50),
+    ->     Price DECIMAL(10, 2)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> CREATE TABLE Orders (
+    ->     OrderID INT PRIMARY KEY,
+    ->     OrderDate DATE,
+    ->     CustomerID INT,
+    ->     ProductID INT,
+    ->     Quantity INT,
+    ->     FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    ->     FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+    -> );
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> INSERT INTO Customers VALUES (1, 'Ravi Kumar', 'ravi@email.com', 'Delhi', 'India');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO Products VALUES (101, 'Laptop', 'Electronics', 55000.00);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> INSERT INTO Orders VALUES (1001, '2024-08-01', 1, 101, 2);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> SELECT
+    ->     p.ProductName,
+    ->     SUM(o.Quantity * p.Price) AS TotalSales
+    -> FROM Orders o
+    -> JOIN Products p ON o.ProductID = p.ProductID
+    -> GROUP BY p.ProductName
+    -> ORDER BY TotalSales DESC;
++-------------+------------+
+| ProductName | TotalSales |
++-------------+------------+
+| Laptop      |  110000.00 |
++-------------+------------+
+1 row in set (0.01 sec)
+
+mysql> SELECT
+    ->     c.Name,
+    ->     SUM(o.Quantity * p.Price) AS TotalPurchase
+    -> FROM Orders o
+    -> JOIN Customers c ON o.CustomerID = c.CustomerID
+    -> JOIN Products p ON o.ProductID = p.ProductID
+    -> GROUP BY c.Name
+    -> ORDER BY TotalPurchase DESC
+    -> LIMIT 5;
++------------+---------------+
+| Name       | TotalPurchase |
++------------+---------------+
+| Ravi Kumar |     110000.00 |
++------------+---------------+
+1 row in set (0.01 sec)
+
+mysql> SELECT
+    ->     DATE_FORMAT(OrderDate, '%Y-%m') AS Month,
+    ->     SUM(o.Quantity * p.Price) AS MonthlyRevenue
+    -> FROM Orders o
+    -> JOIN Products p ON o.ProductID = p.ProductID
+    -> GROUP BY Month
+    -> ORDER BY Month;
++---------+----------------+
+| Month   | MonthlyRevenue |
++---------+----------------+
+| 2024-08 |      110000.00 |
++---------+----------------+
+1 row in set (0.01 sec)
+
+mysql> SELECT
+    ->     p.ProductName,
+    ->     COUNT(*) AS PurchaseCount
+    -> FROM Orders o
+    -> JOIN Products p ON o.ProductID = p.ProductID
+    -> GROUP BY p.ProductName
+    -> ORDER BY PurchaseCount DESC;
++-------------+---------------+
+| ProductName | PurchaseCount |
++-------------+---------------+
+| Laptop      |             1 |
++-------------+---------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT
+    ->     c.Country,
+    ->     SUM(o.Quantity * p.Price) AS Revenue
+    -> FROM Orders o
+    -> JOIN Customers c ON o.CustomerID = c.CustomerID
+    -> JOIN Products p ON o.ProductID = p.ProductID
+    -> GROUP BY c.Country
+    -> ORDER BY Revenue DESC;
++---------+-----------+
+| Country | Revenue   |
++---------+-----------+
+| India   | 110000.00 |
++---------+-----------+
+1 row in set (0.01 sec)
+
+mysql> SELECT
+    ->     AVG(o.Quantity * p.Price) AS AvgOrderValue
+    -> FROM Orders o
+    -> JOIN Products p ON o.ProductID = p.ProductID;
++---------------+
+| AvgOrderValue |
++---------------+
+| 110000.000000 |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT
+    ->     o.OrderID,
+    ->     c.Name AS Customer,
+    ->     p.ProductName,
+    ->     o.Quantity
+    -> FROM Orders o
+    -> JOIN Customers c ON o.CustomerID = c.CustomerID
+    -> JOIN Products p ON o.ProductID = p.ProductID
+    -> WHERE o.Quantity >= 5;
+Empty set (0.00 sec)
